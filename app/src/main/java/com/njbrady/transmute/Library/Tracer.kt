@@ -3,6 +3,7 @@ package com.njbrady.transmute.Library
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import javax.net.ssl.HttpsURLConnection
 
 
 enum class RequestMethods { GET, POST }
@@ -27,9 +28,11 @@ class Tracer(
     private val toSendJson = JSONObject(toSend).toString()
 
     init {
+        connection.instanceFollowRedirects = true
         try {
             connection.requestMethod = requestMethod.toString()
             connection.doOutput = doOutput
+            connection.doInput = true
             for (item in requestProperties) {
                 connection.addRequestProperty(item.key, item.value)
             }

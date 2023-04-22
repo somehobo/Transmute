@@ -1,35 +1,62 @@
 package com.njbrady.transmute
 
-import android.graphics.fonts.FontStyle
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.njbrady.transmute.ui.theme.TransmuteTheme
 
 const val APP_NAME = "PacketMap"
 
 class MainActivity : ComponentActivity() {
+    val tracerViewModel = TracerViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TransmuteTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    Layout()
+            Scaffold(topBar = {
+                TopAppBar(title = {     Text(APP_NAME)
+                }, actions = {
+                    IconButton(
+                        onClick = { tracerViewModel.pleaseGetDadJoke() },
+                        modifier = Modifier
+                            .size(40.dp)
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(40.dp),
+                            imageVector = Icons.Outlined.Refresh,
+                            contentDescription = ""
+                        )
+                    }
+                })
+            }) {
+                TransmuteTheme {
+
+                    // A surface container using the 'background' color from the theme
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colors.background
+                    ) {
+                        Layout(tracerViewModel)
+                    }
                 }
             }
         }
@@ -50,13 +77,12 @@ fun DefaultPreview() {
 }
 
 @Composable
-fun Layout(){
-    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-        item{
-            Title()
-            RandoButton()
-            RandoImage()
-        }
+fun Layout(tracerViewModel: TracerViewModel){
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+//            Title()
+            RandoDadJoke(modifier = Modifier.padding(16.dp), tracerViewModel)
+            Route(modifier = Modifier.padding(16.dp), tracerViewModel)
+//            RandoButton(modifier = Modifier.padding(16.dp), tracerViewModel)
     }
 }
 
@@ -66,15 +92,26 @@ fun Title(){
 }
 
 @Composable
-fun RandoButton(){
+fun RandoButton(modifier: Modifier, tracerViewModel: TracerViewModel){
     Button(onClick = {
-        //your onclick code here
+        tracerViewModel.pleaseGetDadJoke()
     }) {
-        Text(text = "Generate Random Image", fontSize = 30.sp)
+        Text(text = "Request Random Joke", fontSize = 30.sp)
     }
 }
 
 @Composable
-fun RandoImage(){
-    //get request goes here
+fun RandoDadJoke(modifier: Modifier,tracerViewModel: TracerViewModel){
+    val dadJoke by tracerViewModel.dadJoke.collectAsState()
+    dadJoke?.let {
+        Text(text = "Response from server: $it", modifier = modifier, fontSize = 30.sp)
+    }
+}
+
+@Composable
+fun Route(modifier: Modifier,tracerViewModel: TracerViewModel) {
+    val route by tracerViewModel.route.collectAsState()
+    route?.let {
+        Text(text = "Package Route: $it", modifier = modifier, fontSize = 30.sp)
+    }
 }
